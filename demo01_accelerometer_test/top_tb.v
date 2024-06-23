@@ -28,15 +28,13 @@ spi_master #(.div_coef(32'd100))
 DUT2 (
 	.clk_in(CLK),
 	.nrst(NRESET),
-	.spi_clk(spi_clk),
-	.spi_sdo(spi_sdo),
-	.spi_sdi(spi_sdi),
-	.spi_cs(spi_cs),
-	
-	.data_in(data_in),
-	.data_out(data_out),
-	.n_bits(n_bits),    // n_bits==0 -> 1 bit transfer
-	
+	.spi_sck(spi_clk),
+	.spi_mosi(spi_sdo),
+	.spi_miso(spi_sdi),
+	.spi_csn(spi_cs),
+	.mosi_data(data_in),
+	.miso_data(data_out),
+	.nbits(n_bits),
 	.request(request),
 	.ready(ready)
 );
