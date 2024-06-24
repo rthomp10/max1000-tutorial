@@ -20,6 +20,9 @@ wire [5:0] spi_nbits;
 wire spi_request;
 wire spi_ready;
 
+wire spi_csn;
+assign SEN_CS = spi_csn;
+
 sequencer U1 (
 	.clk_in(CLK12M),
 	.nrst(nrst),
@@ -30,7 +33,8 @@ sequencer U1 (
 	
 	.spi_request(spi_request),
 	.spi_ready(spi_ready),
-	
+	.spi_csn(spi_csn),
+
 	.led_out(LED)
 );
 
@@ -42,8 +46,8 @@ U2 (
 	.spi_sck(SEN_SPC),
 	.spi_mosi(SEN_SDI),
 	.spi_miso(SEN_SDO),
-	.spi_csn(SEN_CS),
-	
+	.spi_csn(spi_csn),
+
 	.mosi_data(spi_mosi_data),
 	.miso_data(spi_miso_data),
 	.nbits(spi_nbits),

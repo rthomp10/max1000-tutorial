@@ -8,7 +8,8 @@ module sequencer (
 	
 	output reg spi_request,
 	input  wire spi_ready,
-	
+    input  wire spi_csn,
+
 	output reg [7:0] led_out
 );
 
@@ -22,9 +23,10 @@ localparam
 	STATE_Init2 = 4'd6,
 	STATE_Init2_Wait = 4'd7,
 	STATE_Read = 4'd8,
-	STATE_Read_Wait = 4'd9,
-	STATE_LEDout = 4'd10;
-	
+	STATE_LEDout_Wait = 4'd9,
+	STATE_Read_Wait = 4'd10,
+	STATE_LEDout = 4'd11;
+
 reg [3:0] state;
 
 reg signed [7:0] saved_acc;
@@ -108,26 +110,33 @@ always @(posedge clk_in or negedge nrst)
 			end
 			
 			// 5. Read OUT_X_H (Addr 0x29)
+			STATE_Read_Wait: begin
+				if (spi_ready) begin
+					state <= STATE_Read;
+				end
+				spi_request <= 1'b0;
+			end
+
 			STATE_Read: begin
-				state <= STATE_Read_Wait;
-				
+				state <= STATE_LEDout_Wait;
+
 				spi_request <= 1'b1;
 				spi_nbits <= 6'd23;
 				spi_mosi_data <= 31'b11101000_00000000_00000000;
 			end
-			
-			STATE_Read_Wait: begin
-				if (spi_ready) begin
-					state <= STATE_LEDout;
+
+            STATE_LEDout_Wait: begin
+                if (spi_request == 0 && spi_csn == 1) begin
+                    state <= STATE_LEDout;
 					saved_acc <= spi_miso_data[7:0];
-				end 
-				spi_request <= 1'b0;
-			end
-			
+                end
+                spi_request <= 1'b0;
+            end
+
 			// 6. Set LED output according to accelerometer value
 			STATE_LEDout: begin
-				state <= STATE_Read;
-				
+				state <= STATE_Read_Wait;
+
 				led_out <= 1 << ((saved_acc + 8'Sb1000_0000) >> 5);
 			end
 		endcase
