@@ -33,8 +33,9 @@ sequencer U1 (
 	
 	.led_out(LED)
 );
-	
-spi_master U2 (
+
+spi_master #(.div_coef(32'd200))
+U2 (
 	.clk_in(CLK12M),
 	.nrst(nrst),
 	
